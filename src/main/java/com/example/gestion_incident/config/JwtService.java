@@ -45,6 +45,7 @@ public class JwtService {
                 .setExpiration(new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 24))
                 .signWith(getSingInkey(), SignatureAlgorithm.HS256)
                 .compact();
+
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
