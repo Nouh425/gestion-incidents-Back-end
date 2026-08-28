@@ -24,7 +24,7 @@ public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+//    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Integer id;
 
     private String firstname;
@@ -35,17 +35,22 @@ public class User implements UserDetails {
     @Column(unique = true, nullable = false)
     private String email;
 
-    @JsonIgnore
+
     private String password;
 
     @Enumerated(EnumType.STRING)
     private Role role;
 
+
+    @JsonIgnore // 👈 ADD THIS LINE HERE
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
+
+
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Override
     public String getPassword() {
         return password;

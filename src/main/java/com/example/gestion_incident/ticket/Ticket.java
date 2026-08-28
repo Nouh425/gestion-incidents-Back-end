@@ -3,6 +3,7 @@ package com.example.gestion_incident.ticket;
 import com.example.gestion_incident.categorie.Categorie;
 import com.example.gestion_incident.referentiel.Referentiel;
 import com.example.gestion_incident.user.User;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -30,16 +31,18 @@ public class Ticket {
 
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn( nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private User user;
 
-    // Un ticket ne contient qu'une seule catégorie
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "categorie_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Categorie categorie;
 
-    // Un ticket pointe optionnellement vers un élément du référentiel
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "referentiel_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Referentiel referentiel;
+
 }

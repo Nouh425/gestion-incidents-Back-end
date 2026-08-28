@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -25,15 +26,25 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // 1. AJOUTEZ CETTE LIGNE EN PREMIER POUR ACTIVER CORS DANS SPRING SECURITY
-                .cors(cors -> cors.configure(http))
+                // Correction de la configuration CORS pour les versions récentes de Spring Boot
+                .cors(Customizer.withDefaults())
 
-                .csrf(csrf -> csrf.disable())
+                .csrf(csrf -> csrf
+                        .ignoringRequestMatchers("/api/v1/**")
+                        .disable()
+                )
 
                 .authorizeHttpRequests(auth -> auth
+                        // Routes d'authentification publiques
                         .requestMatchers("/api/v1/auth/**").permitAll()
+
+
+
+
+                        // Tout le reste nécessite un token JWT valide
                         .anyRequest().authenticated()
                 )
+
 
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -54,5 +65,4 @@ public class SecurityConfiguration {
 
         return http.build();
     }
-
 }

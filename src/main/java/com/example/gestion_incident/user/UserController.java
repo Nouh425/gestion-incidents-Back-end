@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -30,16 +31,23 @@ public class UserController {
 
 
 
-    @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<User> updateUser(@PathVariable Integer id, @RequestBody User userDetails) {
+
+
+    @PutMapping("/profile")
+    @PreAuthorize("hasAnyRole('ADMIN','USER','TECHNICIEN')")
+    public ResponseEntity<User> updateProfile(Principal principal, @RequestBody User userDetails) {
         try {
-            User updatedUser = userService.updateUser(id, userDetails);
+            // Spring Security extrait l'email (le "subject") du JWT connecté
+            String userEmail = principal.getName();
+
+            // Appel de votre service mis à jour pour chercher par email
+            User updatedUser = userService.updateUserByEmail(userEmail, userDetails);
             return ResponseEntity.ok(updatedUser);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
     }
+
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
