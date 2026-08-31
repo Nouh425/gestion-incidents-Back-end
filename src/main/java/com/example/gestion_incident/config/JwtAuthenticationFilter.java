@@ -21,7 +21,6 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
-
     private final UserDetailsService userDetailsService;
 
     @Override
@@ -30,39 +29,80 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
-        final String authHeader = request.getHeader("Authorization");
-        final String jwt;
-        final String userEmail;
 
-        // 🟢 Correction : On vérifie "Bearer " avec un espace pour être conforme au standard HTTP
+        String authHeader = request.getHeader("Authorization");
+
+        // Aucun token : Spring Security décidera ensuite si la route est protégée.
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
         try {
-            jwt = authHeader.substring(7);
-            userEmail = jwtService.extractUsername(jwt);
+            String jwt = authHeader.substring(7).trim();
 
-            if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
-                if (jwtService.isTokenValid(jwt, userDetails)) {
-                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                            userDetails,
-                            null,
-                            userDetails.getAuthorities()
-                    );
-                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
-                }
+            if (jwt.isEmpty()) {
+                sendUnauthorized(response, "Token JWT vide");
+                return;
             }
-        } catch (Exception e) {
-            // En cas de token malformé ou expiré sur une route publique, on nettoie le contexte et on continue
-            SecurityContextHolder.clearContext();
-        }
 
-        filterChain.doFilter(request, response);
+            String userEmail = jwtService.extractUsername(jwt);
+
+            if (userEmail == null) {
+                sendUnauthorized(response, "Email introuvable dans le token");
+                return;
+            }
+
+            if (SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails =
+                        userDetailsService.loadUserByUsername(userEmail);
+
+                if (!jwtService.isTokenValid(jwt, userDetails)) {
+                    sendUnauthorized(response, "Token JWT invalide ou expiré");
+                    return;
+                }
+
+                UsernamePasswordAuthenticationToken authToken =
+                        new UsernamePasswordAuthenticationToken(
+                                userDetails,
+                                null,
+                                userDetails.getAuthorities()
+                        );
+
+                authToken.setDetails(
+                        new WebAuthenticationDetailsSource().buildDetails(request)
+                );
+
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+
+                System.out.println(
+                        "JWT valide pour : " + userDetails.getUsername()
+                                + " | rôles : " + userDetails.getAuthorities()
+                );
+            }
+
+            filterChain.doFilter(request, response);
+
+        } catch (Exception e) {
+            SecurityContextHolder.clearContext();
+
+            // À garder temporairement : donne la cause exacte dans la console Spring Boot.
+            e.printStackTrace();
+
+            sendUnauthorized(response, "Token JWT invalide ou expiré");
+        }
     }
 
-}
+    private void sendUnauthorized(
+            HttpServletResponse response,
+            String message
+    ) throws IOException {
 
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write("""
+                {"message":"%s"}
+                """.formatted(message));
+    }
+}

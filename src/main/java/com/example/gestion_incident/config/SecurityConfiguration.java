@@ -10,7 +10,6 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -26,42 +25,37 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // Correction de la configuration CORS pour les versions récentes de Spring Boot
+                .csrf(csrf -> csrf.disable())
                 .cors(Customizer.withDefaults())
 
-                .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/api/v1/**")
-                        .disable()
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("application/json");
+                            response.getWriter().write("""
+                                {"message":"Token JWT absent, invalide ou expiré"}
+                                """);
+                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.setContentType("application/json");
+                            response.getWriter().write("""
+                                {"message":"Vous n'avez pas le rôle nécessaire pour cette action"}
+                                """);
+                        })
                 )
 
                 .authorizeHttpRequests(auth -> auth
-                        // Routes d'authentification publiques
                         .requestMatchers("/api/v1/auth/**").permitAll()
-
-
-
-
-                        // Tout le reste nécessite un token JWT valide
                         .anyRequest().authenticated()
                 )
-
 
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
 
                 .authenticationProvider(authenticationProvider)
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-
-                .logout(logout -> logout
-                        .logoutUrl("/api/v1/auth/logout")
-                        .addLogoutHandler((request, response, authentication) -> {
-                            SecurityContextHolder.clearContext();
-                        })
-                        .logoutSuccessHandler((request, response, authentication) -> {
-                            response.setStatus(HttpServletResponse.SC_OK);
-                        })
-                );
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

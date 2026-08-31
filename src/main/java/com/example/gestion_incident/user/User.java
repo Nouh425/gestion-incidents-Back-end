@@ -42,12 +42,13 @@ public class User implements UserDetails {
     private Role role;
 
 
-    @JsonIgnore // 👈 ADD THIS LINE HERE
+    @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
+        return List.of(
+                new SimpleGrantedAuthority("ROLE_" + role.name())
+        );
     }
-
 
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
