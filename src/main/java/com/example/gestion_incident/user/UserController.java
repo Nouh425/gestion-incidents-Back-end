@@ -29,10 +29,6 @@ public class UserController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-
-
-
-
     @PutMapping("/profile")
     @PreAuthorize("hasAnyRole('ADMIN','USER','TECHNICIEN')")
     public ResponseEntity<User> updateProfile(Principal principal, @RequestBody User userDetails) {

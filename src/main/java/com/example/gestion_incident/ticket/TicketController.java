@@ -32,9 +32,11 @@ public class TicketController {
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<Ticket> createTicket(@RequestBody Ticket ticket) {
+        Ticket createdTicket = ticketService.createTicket(ticket);
+
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(ticketService.createTicket(ticket));
+                .body(createdTicket);
     }
 
     @PutMapping("/{id}")
