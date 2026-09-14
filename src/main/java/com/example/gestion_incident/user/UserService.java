@@ -16,6 +16,12 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+
+
+//    public List<User> getTechniciens() {
+//        return userRepository.findByRole(Role.TECHNICIEN);
+//    }
+
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }

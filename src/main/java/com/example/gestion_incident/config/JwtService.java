@@ -29,6 +29,13 @@ public class JwtService {
     }
 
     // ==========================
+    // Extract user ID
+    // ==========================
+    public Integer extractUserId(String token) {
+        return extractClaim(token, claims -> claims.get("id", Integer.class));
+    }
+
+    // ==========================
     // Extract any claim
     // ==========================
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
@@ -44,6 +51,7 @@ public class JwtService {
         Map<String, Object> claims = new HashMap<>();
 
         if (userDetails instanceof User user) {
+            claims.put("id", user.getId()); // <-- ADDED THIS LINE
             claims.put("role", user.getRole().name());
             claims.put("firstname", user.getFirstname());
             claims.put("lastname", user.getLastname());

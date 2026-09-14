@@ -21,6 +21,12 @@ public class UserController {
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
+//    @GetMapping("/techniciens")
+//    @PreAuthorize("hasRole('ADMIN')")
+//    public ResponseEntity<List<User>> getTechniciens() {
+//        return ResponseEntity.ok(userService.getTechniciens());
+//    }
+
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<User> getUserById(@PathVariable Integer id) {

@@ -1,5 +1,6 @@
 package com.example.gestion_incident.referentiel;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -24,9 +25,11 @@ public class Referentiel {
     // L'élément parent (peut être null si c'est la racine)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
+    @JsonIgnoreProperties("children")
     private Referentiel parent;
 
     // Liste des enfants générés par ce parent
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
+    @JsonIgnoreProperties("parent")
     private List<Referentiel> children;
 }
