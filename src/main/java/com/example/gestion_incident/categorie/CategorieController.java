@@ -16,31 +16,31 @@ public class CategorieController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN','USER') ")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN','USER', 'TECHNICIEN') ")
     public ResponseEntity<List<Categorie>> getAllCategories() {
         return ResponseEntity.ok(categorieService.getAllCategories());
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN','USER', 'TECHNICIEN')")
     public ResponseEntity<Categorie> getCategorieById(@PathVariable Long id) {
         return ResponseEntity.ok(categorieService.getCategorieById(id));
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')")
     public ResponseEntity<Categorie> createCategorie(@RequestBody Categorie categorie) {
         return ResponseEntity.ok(categorieService.createCategorie(categorie));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')")
     public ResponseEntity<Categorie> updateCategorie(@PathVariable Long id, @RequestBody Categorie categorie) {
         return ResponseEntity.ok(categorieService.updateCategorie(id, categorie));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')")
     public ResponseEntity<Void> deleteCategorie(@PathVariable Long id) {
         categorieService.deleteCategorie(id);
         return ResponseEntity.noContent().build();

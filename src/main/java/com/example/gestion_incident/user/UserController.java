@@ -16,7 +16,7 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN','USER', 'TECHNICIEN')")
     public ResponseEntity<List<User>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
     }
@@ -28,7 +28,7 @@ public class UserController {
 //    }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN','USER', 'TECHNICIEN')")
     public ResponseEntity<User> getUserById(@PathVariable Integer id) {
         return userService.getUserById(id)
                 .map(ResponseEntity::ok)
@@ -36,7 +36,7 @@ public class UserController {
     }
 
     @PutMapping("/profile")
-    @PreAuthorize("hasAnyRole('ADMIN','USER','TECHNICIEN')")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN','USER','TECHNICIEN')")
     public ResponseEntity<User> updateProfile(Principal principal, @RequestBody User userDetails) {
         try {
             // Spring Security extrait l'email (le "subject") du JWT connecté
@@ -52,7 +52,7 @@ public class UserController {
 
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')")
     public ResponseEntity<Void> deleteUser(@PathVariable Integer id) {
         try {
             userService.deleteUser(id);

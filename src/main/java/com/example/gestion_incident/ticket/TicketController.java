@@ -18,19 +18,19 @@ public class TicketController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'TECHNICIEN')")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN', 'USER', 'TECHNICIEN')")
     public ResponseEntity<List<Ticket>> getAllTickets() {
         return ResponseEntity.ok(ticketService.getAllTickets());
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'TECHNICIEN')")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN', 'USER', 'TECHNICIEN')")
     public ResponseEntity<Ticket> getTicketById(@PathVariable Long id) {
         return ResponseEntity.ok(ticketService.getTicketById(id));
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN', 'USER')")
     public ResponseEntity<Ticket> createTicket(@RequestBody Ticket ticket) {
         Ticket createdTicket = ticketService.createTicket(ticket);
 
@@ -40,7 +40,7 @@ public class TicketController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')")
     public ResponseEntity<Ticket> updateTicket(
             @PathVariable Long id,
             @RequestBody Ticket ticket
@@ -49,7 +49,7 @@ public class TicketController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')")
     public ResponseEntity<Void> deleteTicket(@PathVariable Long id) {
         ticketService.deleteTicket(id);
         return ResponseEntity.noContent().build();
